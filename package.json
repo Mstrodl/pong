@@ -9,6 +9,7 @@
   "author": "Mary Strodl",
   "license": "MIT",
   "dependencies": {
-    "@slack/bolt": "^3.12.1"
+    "@slack/bolt": "^3.12.1",
+    "node-fetch": "^3.2.10"
   }
 }
