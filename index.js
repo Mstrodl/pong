@@ -4,7 +4,7 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   token: process.env.SLACK_BOT_TOKEN,
 });
-const BLOCKED_CHANNEL = process.env.BLOCKED_CHANNELS.split(",");
+const BLOCKED_CHANNELS = process.env.BLOCKED_CHANNELS.split(",");
 
 app.message("@channel", async ({message, client, ack, say}) => {
   if (BLOCKED_CHANNELS.includes(message.channel.id)) {
