@@ -1,0 +1,14 @@
+{
+  "name": "pong",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Mary Strodl",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/bolt": "^3.12.1"
+  }
+}
