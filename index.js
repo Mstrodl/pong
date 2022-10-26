@@ -6,8 +6,9 @@ function fetch() {
 
 const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  // appToken: process.env.SLACK_APP_TOKEN,
   token: process.env.SLACK_BOT_TOKEN,
+
+  // appToken: process.env.SLACK_APP_TOKEN,
   // socketMode: true,
   // logLevel: LogLevel.DEBUG,
 });
@@ -32,47 +33,61 @@ async function editPrefs(client, prefs) {
   }
 }
 
-const PINGS = ["channel", "here"];
-for (const ping of PINGS) {
-  app.message(`@${ping}`, async ({message, client, ack, say}) => {
-    if (!message.channel) {
-      console.error("No channel id??", message.channel, message.channel_id);
-      return;
-    }
-    if (BLOCKED_CHANNELS.includes(message.channel)) {
-      await client.reactions.add({
-        name: "no_entry",
-        channel: message.channel,
-        timestamp: message.ts,
-      });
-      return;
-    }
+// TODO: Add lookahead
+const PING_RE = /@(channel|here)/g;
 
-    const {user} = await client.users.info({user: message.user});
+app.message(PING_RE, async ({message, client, ack, say}) => {
+  // Pick highest priority ping
+  const range = message.text.match(PING_RE).includes("@channel")
+    ? "channel"
+    : "here";
 
-    try {
-      await editPrefs(client, {
-        who_can_at_everyone: "admin",
-        who_can_at_channel: "ra",
-        warn_before_at_channel: "always",
-      });
-      await say({
-        text: `<!${ping}>`,
-        thread_ts: message.thread_ts || message.ts,
-        username: user.profile.real_name,
-        icon_url: user.profile.image_192,
-      });
-      await editPrefs(client, {
-        who_can_at_everyone: "admin",
-        who_can_at_channel: "admin",
-        warn_before_at_channel: "always",
-      });
-    } catch (err) {
-      console.error("Error sending message", err);
-      throw err;
-    }
-  });
-}
+  if (!message.channel) {
+    console.error("No channel id??", message.channel, message.channel_id);
+    return;
+  }
+  if (BLOCKED_CHANNELS.includes(message.channel)) {
+    await client.reactions.add({
+      name: "no_entry",
+      channel: message.channel,
+      timestamp: message.ts,
+    });
+    return;
+  }
+
+  const {user} = await client.users.info({user: message.user});
+
+  try {
+    await editPrefs(client, {
+      who_can_at_everyone: "admin",
+      who_can_at_channel: "ra",
+      warn_before_at_channel: "always",
+    });
+    await say({
+      text: message.text.replace(PING_RE, (_, range) => `<!${range}>`),
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<!${range}>`,
+          },
+        },
+      ],
+      thread_ts: message.thread_ts || message.ts,
+      username: user.profile.real_name,
+      icon_url: user.profile.image_192,
+    });
+    await editPrefs(client, {
+      who_can_at_everyone: "admin",
+      who_can_at_channel: "admin",
+      warn_before_at_channel: "always",
+    });
+  } catch (err) {
+    console.error("Error sending message", err);
+    throw err;
+  }
+});
 
 (async () => {
   await app.start(process.env.PORT || 3000);
