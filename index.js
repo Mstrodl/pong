@@ -74,7 +74,7 @@ app.message(PING_RE, async ({message, client, ack, say}) => {
           },
         },
       ],
-      thread_ts: message.thread_ts || message.ts,
+      thread_ts: message.thread_ts, // || message.ts,
       username: user.profile.real_name,
       icon_url: user.profile.image_192,
     });
