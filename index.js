@@ -59,7 +59,7 @@ app.message(PING_RE, async ({message, client, ack, say}) => {
 
   try {
     await editPrefs(client, {
-      who_can_at_everyone: "admin",
+      who_can_at_everyone: "owner",
       who_can_at_channel: "ra",
       warn_before_at_channel: "always",
     });
@@ -79,8 +79,8 @@ app.message(PING_RE, async ({message, client, ack, say}) => {
       icon_url: user.profile.image_192,
     });
     await editPrefs(client, {
-      who_can_at_everyone: "admin",
-      who_can_at_channel: "admin",
+      who_can_at_everyone: "owner",
+      who_can_at_channel: "owner",
       warn_before_at_channel: "always",
     });
   } catch (err) {
